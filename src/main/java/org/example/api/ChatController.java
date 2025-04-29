@@ -5,6 +5,7 @@ import ch.qos.logback.core.util.StringUtil;
 import com.alibaba.fastjson.JSONObject;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.example.config.ChatAssistant;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 
@@ -39,14 +41,19 @@ public class ChatController {
                 conversationId = UUID.randomUUID().toString();
             }
             SseEmitter emitter = new SseEmitter();
-            // CompletableFuture.runAsync(() -> {
-            TokenStream tokenStream = chatAssistant.streamingChat(conversationId, message, userId);
-            tokenStream.onPartialResponse((String partialResponse) -> {
+            String finalConversationId = conversationId;
+          //CompletableFuture.runAsync(() -> {
+            TokenStream tokenStream = chatAssistant.streamingChat(finalConversationId, message, userId);
+            tokenStream
+                    .onToolExecuted((ToolExecution toolExecution) ->{
+                        System.out.println(toolExecution);
+                    })
+                    .onPartialResponse((String partialResponse) -> {
                                    try {
-                                       //System.out.println(partialResponse);
+                                       System.out.println(partialResponse);
                                        // 发送部分响应到客户端
                                        emitter.send(SseEmitter.event().data(partialResponse));
-                                       //Thread.sleep(300);
+                                       Thread.sleep(100);
                                    } catch (Exception e) {
                                        emitter.completeWithError(e);
                                    }
@@ -54,7 +61,7 @@ public class ChatController {
                                .onCompleteResponse((ChatResponse response) -> emitter.complete())
                                .onError((Throwable error) -> emitter.completeWithError(error))
                                .start();
-                 // });
+          // });
             return emitter;
         }
 

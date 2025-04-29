@@ -49,8 +49,10 @@ public class LllMConfig {
     public BedrockStreamingChatModel streamingChatLanguageModel() {
         return BedrockStreamingChatModel.builder()
                 .region(Region.US_EAST_1)
-                .modelId("amazon.nova-pro-v1:0")
-                // .modelId("us.anthropic.claude-3-7-sonnet-20250219-v1:0")
+               //.modelId("amazon.nova-pro-v1:0")
+               // .modelId("amazon.nova-lite-v1:0")
+              //.modelId("us.anthropic.claude-3-7-sonnet-20250219-v1:0")
+                .modelId("us.anthropic.claude-3-5-sonnet-20241022-v2:0")
                 .maxRetries(2)
                 .timeout(Duration.ofMinutes(1))
                 .defaultRequestParameters(BedrockChatRequestParameters.builder()
@@ -59,10 +61,10 @@ public class LllMConfig {
                 .build();
     }
 
-/*    @Bean
+/*   @Bean
     public StreamingChatLanguageModel streamingChatLanguageModel() {
         return OpenAiStreamingChatModel.builder()
-                //.apiKey("")
+                .apiKey("")
               .modelName("gpt-4o-mini") // common parameter
                 .temperature(1.0) // common parameter
                 .build();
