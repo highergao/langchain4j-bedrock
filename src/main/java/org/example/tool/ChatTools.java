@@ -24,13 +24,21 @@ public class ChatTools {
     }
 
     @Tool("add new student to class" +
-            "增加学生之前,需要检查 class room 是否有效 存在" +
+            "before student add,need validate class room  if existed" +
             "-studentName " +
-            "- classRoom should in school class room")
+            "-classRoom should in school class room" +
+            "confirm need user to confirm all param info" +
+            " Once all needed information is available, present a chore summary and ask the user to type \"Done\" to confirm and save.")
     public String studentToClass(@P("studentName") String studentName,
-                                   @P("classRoom") String classRoom
+                                   @P("classRoom") String classRoom,
+                                    @P("confirm") boolean confirm
                                    ){
         System.out.println("studentToClass done");
-        return "add new student"+studentName+"to class room"+classRoom;
+        if(confirm){
+            return "add new student"+studentName+"to class room"+classRoom;
+        }else {
+            return "are you sure for do this";
+        }
+
     }
 }

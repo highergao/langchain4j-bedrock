@@ -8,7 +8,11 @@ import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.servlet.http.HttpServletRequest;
 
+import lombok.val;
 import org.example.config.ChatAssistant;
+import org.example.config.LangChain4jChatResponse;
+import org.example.config.ToolExecutionDto;
+import org.example.config.ToolExecutionParamDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,7 +42,7 @@ public class ChatController {
             String userId = request.getHeader("userId");
             String conversationId = jsonObject.getString("conversationId");
             if(StringUtil.isNullOrEmpty(conversationId)) {
-                conversationId = UUID.randomUUID().toString();
+                conversationId = userId;
             }
             SseEmitter emitter = new SseEmitter();
             String finalConversationId = conversationId;
@@ -46,14 +50,26 @@ public class ChatController {
             TokenStream tokenStream = chatAssistant.streamingChat(finalConversationId, message, userId);
             tokenStream
                     .onToolExecuted((ToolExecution toolExecution) ->{
-                        System.out.println(toolExecution);
+                        val toolRequest = toolExecution.request();
+                        ToolExecutionParamDto toolExecutionParamDto =
+                                new ToolExecutionParamDto(toolRequest.id(),toolRequest.name(),toolRequest.arguments());
+                        ToolExecutionDto toolExecutionDto = new ToolExecutionDto(toolExecution.result(),toolExecutionParamDto);
+                        LangChain4jChatResponse chatResponse = new LangChain4jChatResponse();
+                        chatResponse.setToolExecutionDto(toolExecutionDto);
+                        try {
+                            // 发送部分响应到客户端
+                            emitter.send(SseEmitter.event().data(JSONObject.toJSONString(chatResponse)).build());
+                           // Thread.sleep(100);
+                        } catch (Exception e) {
+                            emitter.completeWithError(e);
+                        }
                     })
                     .onPartialResponse((String partialResponse) -> {
                                    try {
                                        System.out.println(partialResponse);
                                        // 发送部分响应到客户端
                                        emitter.send(SseEmitter.event().data(partialResponse));
-                                       Thread.sleep(100);
+                                      // Thread.sleep(300);
                                    } catch (Exception e) {
                                        emitter.completeWithError(e);
                                    }

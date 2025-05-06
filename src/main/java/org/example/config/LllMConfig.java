@@ -45,7 +45,7 @@ public class LllMConfig {
                 .build();
     }
 
-    @Bean
+/*    @Bean
     public BedrockStreamingChatModel streamingChatLanguageModel() {
         return BedrockStreamingChatModel.builder()
                 .region(Region.US_EAST_1)
@@ -59,14 +59,14 @@ public class LllMConfig {
                         .temperature(0.7)
                         .topP(0.9).maxOutputTokens(2048).build())
                 .build();
-    }
+    }*/
 
-/*   @Bean
+   @Bean
     public StreamingChatLanguageModel streamingChatLanguageModel() {
         return OpenAiStreamingChatModel.builder()
                 .apiKey("")
               .modelName("gpt-4o-mini") // common parameter
                 .temperature(1.0) // common parameter
                 .build();
-    }*/
+    }
 }
